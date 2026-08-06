@@ -44,7 +44,7 @@ report <- validate_df(messy_df)
 report
 #> < validation_report for 'messy_df' >
 #> 10 rows, 3 columns
-#> Checked: 2026-08-06 21:32:45 
+#> Checked: 2026-08-06 23:19:47 
 #> 
 #> Missing values:  1  column(s) affected
 #> Outliers:        1  column(s) affected
@@ -76,8 +76,9 @@ report$results$types
 
 And visualize missing values and outliers per column:
 
-<img src="man/figures/README-pressure-1.png" alt="" width="100%" /> \##
-Individual checks
+<img src="man/figures/README-pressure-1.png" alt="" width="100%" />
+
+## Individual checks
 
 Each check is also available on its own, if you only need one:
 

@@ -27,7 +27,6 @@ You can install the development version of validateR from [GitHub](https://githu
 ``` r
 pak::pak("UgyenNorbu/validateR")
 ```
-
 ## Example
 
 The main entry point is `validate_df()`, which runs all four checks at once and returns a single report:
@@ -61,6 +60,7 @@ And visualize missing values and outliers per column:
 ```{r pressure, echo = FALSE}
 plot(report)
 ```
+
 ## Individual checks
 
 Each check is also available on its own, if you only need one:
