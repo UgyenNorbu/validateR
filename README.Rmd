@@ -22,10 +22,11 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install the development version of validateR like so:
+You can install the development version of validateR from [GitHub](https://github.com/UgyenNorbu/validateR) with:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+# install.packages("devtools")
+devtools::install_github("UgyenNorbu/validateR")
 ```
 
 ## Example
