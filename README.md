@@ -19,8 +19,7 @@ You can install the development version of validateR from
 [GitHub](https://github.com/UgyenNorbu/validateR) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("UgyenNorbu/validateR")
+pak::pak("UgyenNorbu/validateR")
 ```
 
 ## Example
@@ -45,7 +44,7 @@ report <- validate_df(messy_df)
 report
 #> < validation_report for 'messy_df' >
 #> 10 rows, 3 columns
-#> Checked: 2026-08-06 21:26:08 
+#> Checked: 2026-08-06 21:32:45 
 #> 
 #> Missing values:  1  column(s) affected
 #> Outliers:        1  column(s) affected
