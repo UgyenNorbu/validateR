@@ -1,0 +1,70 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# validateR
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+`validateR` is a lightweight toolkit for checking data frames for common data quality issues: missing values, outliers, duplicate rows, and type inconsistencies. Results are returned as a structured report object with `print` and `plot` methods, so you can quickly see what's wrong with your data before you start analyzing it.
+
+## Installation
+
+You can install the development version of validateR like so:
+
+``` r
+# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```
+
+## Example
+
+The main entry point is `validate_df()`, which runs all four checks at once and returns a single report:
+
+```{r example}
+library(validateR)
+
+messy_df <- data.frame(
+  age = c(25, 30, NA, 45, 22, 31, 29, 200),
+  income = c("50000", "62000", "N/A", "48000",
+             "71000", "55000", "60000", "48000"),
+  city = c("Thimphu", "Paro", "Thimphu", "Paro",
+           "Thimphu", "Paro", "Punakha", "Paro"),
+  stringsAsFactors = FALSE
+)
+messy_df <- rbind(messy_df, messy_df[1, ], messy_df[4, ])
+
+report <- validate_df(messy_df)
+report
+```
+
+You can drill into the full detail behind any of the four checks:
+
+```{r cars}
+report$results$missing
+report$results$types
+```
+
+And visualize missing values and outliers per column:
+
+```{r pressure, echo = FALSE}
+plot(report)
+```
+## Individual checks
+
+Each check is also available on its own, if you only need one:
+
+```{r individual}
+check_duplicates(messy_df)
+```
