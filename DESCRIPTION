@@ -20,3 +20,5 @@ Imports:
     graphics,
     stats
 VignetteBuilder: knitr
+URL: https://github.com/UgyenNorbu/validateR
+BugReports: https://github.com/UgyenNorbu/validateR/issues
