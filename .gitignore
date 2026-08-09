@@ -1,3 +1,7 @@
+# Output images
+*.png
+
+
 # History files
 .Rhistory
 .Rapp.history
@@ -5,6 +9,7 @@
 # Session data
 .RData
 .Ruserdata
+.DS_Store
 
 # Example code in package build process
 *-Ex.R
@@ -38,3 +43,6 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+inst/doc
+/doc/
+/Meta/

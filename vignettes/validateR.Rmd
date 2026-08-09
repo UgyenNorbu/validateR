@@ -1,0 +1,205 @@
+---
+title: "validateR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{validateR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+Real-world data is rarely clean. A column might have missing values that
+are easy to overlook. A few extreme (outlier) values might sneak into an
+otherwise normal numeric column. Rows sometimes get duplicated by
+accident during data collection or when merging files. And a column that
+should be numeric can end up stored as text, just because a few entries
+contain things like `"N/A"` or `"unknown"`.
+
+`validateR` is a small set of tools that helps you catch these problems
+before they affect your analysis. It checks a data frame for four common
+issues:
+
+- **Missing values** — how many values are missing in each column, and
+  what percentage that represents
+- **Outliers** — unusually extreme numeric values, detected using the
+  IQR method
+- **Duplicate rows** — rows that are exact copies of each other, grouped
+  so you can see which rows match
+- **Type inconsistencies** — text columns that look like they were meant
+  to hold numbers, but have a few values that don't convert cleanly
+
+This vignette walks through a complete example: starting with a messy
+data frame, running a check, and reading the results.
+
+```{r setup}
+library(validateR)
+```
+
+## A messy example
+
+Let's create a small data frame with a few realistic problems: a missing
+value, an outlier, a duplicated row, and a text column that should
+probably be numeric.
+
+```{r create-data}
+messy_data <- data.frame(
+  age = c(25, 12, NA, 17, 19), 
+  weight = c("45", "34", "25", "N/A", "32"),
+  price = c(100, 120, 140, 1500, 125)
+)
+messy_data <- rbind(messy_data, messy_data[3, ])
+messy_data
+```
+
+## Running `validate_df()`
+
+The main entry point is `validate_df()`. It runs all four checks at once
+and returns a single report object.
+
+```{r run-validate}
+report <- validate_df(messy_data)
+report
+```
+
+## Looking at the details
+
+The printed summary tells you *how many* columns were affected by each
+check, but not the specifics. The full results are stored inside the
+report object, under `report$results`, and are worth exploring directly
+when you need to act on what was found.
+
+### Missing values
+
+`report$results$missing` is a data frame with one row per column,
+showing the count and percentage of missing values.
+
+```{r}
+report$results$missing
+```
+
+Here, `age` has two missing values out of six rows, while `weight` and
+`price` have none. If a column had a high percentage of missing values,
+this table would make that immediately clear, without needing to
+visually inspect the raw data.
+
+### Outliers
+
+`report$results$outliers` is also a data frame, one row per *numeric*
+column, showing how many values were flagged as outliers using the IQR
+method.
+
+```{r}
+report$results$outliers
+```
+
+`price` shows one outlier, which is the `1500` value standing well apart
+from the rest of the column. `age` shows none. Note that non-numeric
+columns, like `weight`, don't appear here at all, since outlier
+detection only makes sense for numeric data.
+
+### Duplicate rows
+
+`report$results$duplicates` is a list, rather than a data frame. Each
+element, representing a group of duplicate rows, has row numbers that
+are exact duplicates of each other.
+
+```{r}
+report$results$duplicates
+```
+
+This shows one group, containing rows 3 and 6 — the row we duplicated on
+purpose when building the example data. If there were several separate
+groups of duplicate rows, each would appear as its own element in this
+list.
+
+### Type inconsistencies
+
+`report$results$types` is a named list, with one element per column that
+looks like it was meant to be numeric but contains some values that
+don't convert cleanly.
+
+```{r}
+report$results$types
+```
+
+The `weight` column is flagged here: about 83% of its values convert to
+numbers, and the one value that doesn't (`"N/A"`, in row 4) is listed
+under `bad_rows`. This is enough information to go back to the original
+data and decide whether to fix, remove, or investigate that value.
+
+## Visualizing the results
+
+For a quick visual overview, `plot()` shows two bar charts: missing
+value counts and outlier counts, one column per bar.
+
+```{r, fig.width=6, fig.height=6}
+plot(report)
+```
+
+## Running checks individually
+
+Sometimes you don't need the full report — maybe you already know your
+data is fine except for one specific concern. Each check function used
+by `validate_df()` is also exported and can be used on its own.
+
+```{r}
+check_outliers(messy_data)
+```
+
+This runs just the outlier check, without computing the other three. The
+same applies to `check_missing()`, `check_duplicates()`, and
+`check_types()`.
+
+## How the thresholds work
+
+Two of the checks make a judgment call about what counts as a problem.
+It's worth understanding how each one decides, so you know when to trust
+the default behavior and when you might want to inspect the results more
+closely yourself.
+
+### Outliers: the IQR method
+
+`check_outliers()` flags a value as an outlier using a method commonly
+used in boxplots. For each numeric column, it calculates the
+interquartile range (IQR) — the spread between the 25th and 75th
+percentile of the values. A value is flagged if it falls more than 1.5
+times the IQR below the 25th percentile, or more than 1.5 times the IQR
+above the 75th percentile.
+
+This method doesn't assume the data follows any particular distribution,
+and it adapts to the natural spread of each column, so a column with
+naturally wide-ranging values won't automatically produce a flood of
+false positives. It's a reasonable default, but like any rule of thumb,
+it can flag values that are perfectly legitimate for a given dataset, or
+miss unusual values that don't happen to fall outside the calculated
+range. When in doubt, it's worth looking at the flagged values yourself
+before deciding what to do with them.
+
+### Type inconsistencies: the 80% threshold
+
+`check_types()` only flags a character column if at least 80% of its
+non-missing values can be converted to numbers. This threshold exists to
+avoid false alarms: a column that's genuinely meant to hold text, like a
+product code or category label, might occasionally include a few values
+that happen to look numeric, just by chance. Flagging a column like that
+as "should be numeric" wouldn't be useful, and a low threshold would
+make this kind of mistake much more likely.
+
+A column that's already 100% numeric-looking isn't flagged either, even
+though it's stored as text. In that case, there's no real inconsistency
+to report; the column is just the wrong storage type, which is a
+different kind of problem than a mix of good and bad values.
+
+Values that are already missing (`NA`) are never counted as "bad" by
+this check; missingness is handled separately, by `check_missing()`.

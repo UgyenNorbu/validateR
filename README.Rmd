@@ -57,7 +57,7 @@ report$results$types
 
 And visualize missing values and outliers per column:
 
-```{r pressure, echo = FALSE}
+```{r report, echo = FALSE}
 plot(report)
 ```
 
