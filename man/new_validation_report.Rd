@@ -10,7 +10,8 @@ new_validation_report(
   missing_result,
   outliers_result,
   duplicates_result,
-  types_result
+  numeric_like_result,
+  date_like_result
 )
 }
 \arguments{
@@ -26,7 +27,9 @@ data frame in printed output.}
 
 \item{duplicates_result}{Output of \code{\link[=check_duplicates]{check_duplicates()}}.}
 
-\item{types_result}{Output of \code{\link[=check_types]{check_types()}}.}
+\item{numeric_like_result}{Output of \code{\link[=check_numeric_like]{check_numeric_like()}}.}
+
+\item{date_like_result}{Output of \code{\link[=check_date_like]{check_date_like()}}}
 }
 \value{
 An object of class \code{validation_report}, a list containing:
@@ -35,8 +38,8 @@ An object of class \code{validation_report}, a list containing:
 of rows and columns), and \code{timestamp} (the time the report was
 created).}
 \item{results}{A list with four elements, \code{missing}, \code{outliers},
-\code{duplicates}, and \code{types}, containing the corresponding check
-results.}
+\code{duplicates}, \code{numeric_like} and \code{date_like}, containing the
+corresponding check results.}
 }
 }
 \description{
@@ -44,9 +47,10 @@ Low-level constructor that assembles already-computed check results
 into a single \code{validation_report} object. This function does not run
 any checks itself — it simply packages results produced elsewhere
 (typically by \code{\link[=check_missing]{check_missing()}}, \code{\link[=check_outliers]{check_outliers()}},
-\code{\link[=check_duplicates]{check_duplicates()}}, and \code{\link[=check_types]{check_types()}}) into a structured, classed
-object. In most cases, users should call \code{\link[=validate_df]{validate_df()}} instead, which
-runs all four checks and calls this constructor automatically.
+\code{\link[=check_duplicates]{check_duplicates()}}, \code{\link[=check_numeric_like]{check_numeric_like()}}, and \code{\link[=check_date_like]{check_date_like()}})
+into a structured, classed object. In most cases, users should call
+\code{\link[=validate_df]{validate_df()}} instead, which runs all five checks and calls this
+constructor automatically.
 }
 \examples{
 df <- data.frame(x = c(1, NA, 3), y = c("a", "b", "c"))
@@ -56,7 +60,8 @@ report <- new_validation_report(
   missing_result = check_missing(df),
   outliers_result = check_outliers(df),
   duplicates_result = check_duplicates(df),
-  types_result = check_types(df)
+  numeric_like_result = check_numeric_like(df),
+  date_like_result = check_date_like(df, date_columns = c(y = "\%Y-\%m-\%d"))
 )
 class(report)
 

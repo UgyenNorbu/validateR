@@ -2,10 +2,11 @@
 
 S3method(plot,validation_report)
 S3method(print,validation_report)
+export(check_date_like)
 export(check_duplicates)
 export(check_missing)
+export(check_numeric_like)
 export(check_outliers)
-export(check_types)
 export(new_validation_report)
 export(validate_df)
 importFrom(graphics,

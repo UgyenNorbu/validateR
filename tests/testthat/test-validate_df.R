@@ -30,7 +30,8 @@ test_that("validate_df assembles results from all four checks", {
   expect_true(is.data.frame(report$results$missing))
   expect_true(is.data.frame(report$results$outliers))
   expect_true(is.list(report$results$duplicates))
-  expect_true(is.list(report$results$types))
+  expect_true(is.list(report$results$numeric_like))
+  expect_null(report$results$date_like)
 })
 
 test_that("validate_df rejects input that is not a data frame", {

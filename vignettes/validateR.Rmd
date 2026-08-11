@@ -16,19 +16,20 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
 ## Introduction
 
 Real-world data is rarely clean. A column might have missing values that
 are easy to overlook. A few extreme (outlier) values might sneak into an
 otherwise normal numeric column. Rows sometimes get duplicated by
-accident during data collection or when merging files. And a column that
+accident during data collection or when merging files. A column that
 should be numeric can end up stored as text, just because a few entries
-contain things like `"N/A"` or `"unknown"`.
+contain things like `"N/A"` or `"unknown"`. And a column of dates can
+have a few entries that don't match the format the rest of the column
+uses.
 
 `validateR` is a small set of tools that helps you catch these problems
-before they affect your analysis. It checks a data frame for four common
-issues:
+before they affect your analysis. It checks a data frame for five
+common issues:
 
 - **Missing values** — how many values are missing in each column, and
   what percentage that represents
@@ -36,8 +37,12 @@ issues:
   IQR method
 - **Duplicate rows** — rows that are exact copies of each other, grouped
   so you can see which rows match
-- **Type inconsistencies** — text columns that look like they were meant
-  to hold numbers, but have a few values that don't convert cleanly
+- **Numeric-like inconsistencies** — text columns that look like they
+  were meant to hold numbers, but have a few values that don't convert
+  cleanly
+- **Date-like inconsistencies** (optional) — text columns that look
+  like they were meant to hold dates in a format you specify, but have
+  a few values that don't parse cleanly
 
 This vignette walks through a complete example: starting with a messy
 data frame, running a check, and reading the results.
@@ -64,8 +69,10 @@ messy_data
 
 ## Running `validate_df()`
 
-The main entry point is `validate_df()`. It runs all four checks at once
-and returns a single report object.
+The main entry point is `validate_df()`. It runs four checks
+automatically, and returns a single report object. A fifth check, for
+date-like columns, is available too, but only runs if you ask for it —
+more on that later in this vignette.
 
 ```{r run-validate}
 report <- validate_df(messy_data)
@@ -123,14 +130,14 @@ purpose when building the example data. If there were several separate
 groups of duplicate rows, each would appear as its own element in this
 list.
 
-### Type inconsistencies
+### Numeric-like inconsistencies
 
-`report$results$types` is a named list, with one element per column that
-looks like it was meant to be numeric but contains some values that
-don't convert cleanly.
+`report$results$numeric_like` is a named list, with one element per
+column that looks like it was meant to be numeric but contains some
+values that don't convert cleanly.
 
 ```{r}
-report$results$types
+report$results$numeric_like
 ```
 
 The `weight` column is flagged here: about 83% of its values convert to
@@ -157,13 +164,13 @@ by `validate_df()` is also exported and can be used on its own.
 check_outliers(messy_data)
 ```
 
-This runs just the outlier check, without computing the other three. The
-same applies to `check_missing()`, `check_duplicates()`, and
-`check_types()`.
+This runs just the outlier check, without computing the others. The
+same applies to `check_missing()`, `check_duplicates()`,
+`check_numeric_like()`, and `check_date_like()`.
 
 ## How the thresholds work
 
-Two of the checks make a judgment call about what counts as a problem.
+Some of the checks make a judgment call about what counts as a problem.
 It's worth understanding how each one decides, so you know when to trust
 the default behavior and when you might want to inspect the results more
 closely yourself.
@@ -178,28 +185,4 @@ times the IQR below the 25th percentile, or more than 1.5 times the IQR
 above the 75th percentile.
 
 This method doesn't assume the data follows any particular distribution,
-and it adapts to the natural spread of each column, so a column with
-naturally wide-ranging values won't automatically produce a flood of
-false positives. It's a reasonable default, but like any rule of thumb,
-it can flag values that are perfectly legitimate for a given dataset, or
-miss unusual values that don't happen to fall outside the calculated
-range. When in doubt, it's worth looking at the flagged values yourself
-before deciding what to do with them.
-
-### Type inconsistencies: the 80% threshold
-
-`check_types()` only flags a character column if at least 80% of its
-non-missing values can be converted to numbers. This threshold exists to
-avoid false alarms: a column that's genuinely meant to hold text, like a
-product code or category label, might occasionally include a few values
-that happen to look numeric, just by chance. Flagging a column like that
-as "should be numeric" wouldn't be useful, and a low threshold would
-make this kind of mistake much more likely.
-
-A column that's already 100% numeric-looking isn't flagged either, even
-though it's stored as text. In that case, there's no real inconsistency
-to report; the column is just the wrong storage type, which is a
-different kind of problem than a mix of good and bad values.
-
-Values that are already missing (`NA`) are never counted as "bad" by
-this check; missingness is handled separately, by `check_missing()`.
+and it adapts to the natural spread of each column, so a

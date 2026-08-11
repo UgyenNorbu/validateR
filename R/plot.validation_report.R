@@ -1,4 +1,3 @@
-#' @importFrom graphics par barplot
 #' Plot a validation_report object
 #'
 #' Displays two side-by-side bar charts summarizing a `validation_report`:
@@ -12,6 +11,7 @@
 #' @return The input `x`, returned invisibly. Called for its side effect
 #'   of producing a plot.
 #'
+#' @importFrom graphics par barplot
 #' @export
 plot.validation_report <- function(x, ...) {
   old_par <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))

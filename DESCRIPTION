@@ -1,6 +1,6 @@
 Package: validateR
 Title: Simple Data Frame Validation and Quality Checks
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Ugyen", "Norbu", , "unorbu2019@gmail.com", role = c("aut", "cre"))
 Description: Checks a data frame for common data quality issues,

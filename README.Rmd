@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-`validateR` is a lightweight toolkit for checking data frames for common data quality issues: missing values, outliers, duplicate rows, and type inconsistencies. Results are returned as a structured report object with `print` and `plot` methods, so you can quickly see what's wrong with your data before you start analyzing it.
+`validateR` is a lightweight toolkit for checking data frames for common data quality issues: missing values, outliers, duplicate rows, numeric-like inconsistencies, and (optionally) date-like inconsistencies. Results are returned as a structured report object with `print` and `plot` methods, so you can quickly see what's wrong with your data before you start analyzing it.
 
 ## Installation
 
@@ -29,7 +29,7 @@ pak::pak("UgyenNorbu/validateR")
 ```
 ## Example
 
-The main entry point is `validate_df()`, which runs all four checks at once and returns a single report:
+The main entry point is `validate_df()`, which runs several checks at once and returns a single report:
 
 ```{r example}
 library(validateR)
@@ -48,17 +48,42 @@ report <- validate_df(messy_df)
 report
 ```
 
-You can drill into the full detail behind any of the four checks:
+You can drill into the full detail behind any of the checks:
 
-```{r cars}
+```{r drill-down}
 report$results$missing
-report$results$types
+report$results$numeric_like
 ```
 
 And visualize missing values and outliers per column:
 
-```{r report, echo = FALSE}
+```{r plot-example, echo = FALSE}
 plot(report)
+```
+
+## Checking date-like columns
+
+`validate_df()` can also check whether character columns contain values that look like dates in a format you specify. This check is optional, since date formats are ambiguous (for example, `"03/04/2023"` could mean March 4th or April 3rd, depending on convention) — so rather than guessing, you tell it what format to expect for each column you want checked.
+
+```{r date-example}
+dated_df <- data.frame(
+  signup_date = c("2023-01-15", "2023-02-20", "not a date",
+                  "2023-03-10", "2023-04-01"),
+  stringsAsFactors = FALSE
+)
+
+report_with_dates <- validate_df(
+  dated_df,
+  date_columns = c(signup_date = "%Y-%m-%d")
+)
+report_with_dates
+```
+
+If `date_columns` isn't supplied, `validate_df()` skips date checking entirely, and the report notes that it wasn't checked rather than implying the column was fine:
+
+```{r no-date-example}
+report_without_dates <- validate_df(dated_df)
+report_without_dates
 ```
 
 ## Individual checks

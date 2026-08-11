@@ -4,9 +4,10 @@
 #' into a single `validation_report` object. This function does not run
 #' any checks itself — it simply packages results produced elsewhere
 #' (typically by [check_missing()], [check_outliers()],
-#' [check_duplicates()], and [check_types()]) into a structured, classed
-#' object. In most cases, users should call [validate_df()] instead, which
-#' runs all four checks and calls this constructor automatically.
+#' [check_duplicates()], [check_numeric_like()], and [check_date_like()])
+#' into a structured, classed object. In most cases, users should call
+#' [validate_df()] instead, which runs all five checks and calls this
+#' constructor automatically.
 #'
 #' @param df The data frame that was checked. Used only to derive
 #'   dimensions; not stored directly in the report.
@@ -15,7 +16,8 @@
 #' @param missing_result Output of [check_missing()].
 #' @param outliers_result Output of [check_outliers()].
 #' @param duplicates_result Output of [check_duplicates()].
-#' @param types_result Output of [check_types()].
+#' @param numeric_like_result Output of [check_numeric_like()].
+#' @param date_like_result Output of [check_date_like()]
 #'
 #' @return An object of class `validation_report`, a list containing:
 #' \describe{
@@ -23,8 +25,8 @@
 #'   of rows and columns), and `timestamp` (the time the report was
 #'   created).}
 #'   \item{results}{A list with four elements, `missing`, `outliers`,
-#'   `duplicates`, and `types`, containing the corresponding check
-#'   results.}
+#'   `duplicates`, `numeric_like` and `date_like`, containing the
+#'    corresponding check results.}
 #' }
 #'
 #' @examples
@@ -35,7 +37,8 @@
 #'   missing_result = check_missing(df),
 #'   outliers_result = check_outliers(df),
 #'   duplicates_result = check_duplicates(df),
-#'   types_result = check_types(df)
+#'   numeric_like_result = check_numeric_like(df),
+#'   date_like_result = check_date_like(df, date_columns = c(y = "%Y-%m-%d"))
 #' )
 #' class(report)
 #'
@@ -45,7 +48,8 @@ new_validation_report <- function(df,
                                   missing_result,
                                   outliers_result,
                                   duplicates_result,
-                                  types_result) {
+                                  numeric_like_result,
+                                  date_like_result) {
   validation_report_list <- list(
     meta = list(
       df_name = df_name,
@@ -56,7 +60,8 @@ new_validation_report <- function(df,
       missing = missing_result,
       outliers = outliers_result,
       duplicates = duplicates_result,
-      types = types_result
+      numeric_like = numeric_like_result,
+      date_like = date_like_result
     )
   )
   class(validation_report_list) <- "validation_report"
@@ -82,11 +87,18 @@ print.validation_report <- function(x, ...) {
   cat(x$meta$dim[1], "rows,", x$meta$dim[2], "columns\n")
   cat("Checked:", format(x$meta$timestamp), "\n\n")
 
-  cat("Missing values: ", sum(x$results$missing$n_missing > 0), " column(s) affected\n")
-  cat("Outliers:       ", sum(x$results$outliers$n_outliers > 0), " column(s) affected\n")
-  cat("Duplicates:     ", length(x$results$duplicates), " group(s) affected\n")
-  cat("Type issues:    ", length(x$results$types), " column(s) affected\n")
-  cat("\nFor details, inspect report$results$missing, $outliers, $duplicates, $types\n")
+  cat("Missing values:         ", sum(x$results$missing$n_missing > 0), " column(s) affected\n")
+  cat("Outliers:               ", sum(x$results$outliers$n_outliers > 0), " column(s) affected\n")
+  cat("Duplicates:             ", length(x$results$duplicates), " group(s) affected\n")
+  cat("Numeric-like issues:    ", length(x$results$numeric_like), " column(s) affected\n")
+
+  if (is.null(x$results$date_like)) {
+    cat("Date-like issues:        NOT checked \n")
+  } else {
+    cat("Date-like issues:       ", length(x$results$date_like), " column(s) affected \n")
+  }
+
+  cat("\nFor details, inspect report$results$missing, $outliers, $duplicates, $numeric_like, $date_like \n")
 
   invisible(x)
 }

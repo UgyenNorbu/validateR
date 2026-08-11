@@ -4,17 +4,25 @@
 \alias{validate_df}
 \title{Validate a data frame for common data quality issues}
 \usage{
-validate_df(data)
+validate_df(data, date_columns = NULL)
 }
 \arguments{
 \item{data}{A data frame to validate.}
+
+\item{date_columns}{Optional. A named character vector mapping column
+names in \code{data} to their expected date format (using the format
+codes accepted by \code{\link[base:as.Date]{base::as.Date()}}). If supplied, \code{check_date_like()}
+is run on those columns as a fifth check. If \code{NULL} (the default),
+date checking is skipped entirely, and the report notes it was not
+checked.}
 }
 \value{
 An object of class \code{validation_report}. See
 \code{\link[=new_validation_report]{new_validation_report()}} for details on its structure. Printing the
 result shows a short summary; the full results for each check are
 available under \code{report$results$missing}, \code{report$results$outliers},
-\code{report$results$duplicates}, and \code{report$results$types}.
+\code{report$results$duplicates}, \code{report$results$numeric_like} and
+\code{report$results$date_like}.
 }
 \description{
 Runs a full suite of data quality checks on a data frame — missing
@@ -31,5 +39,16 @@ df <- data.frame(
 )
 report <- validate_df(df)
 report
+
+# With an optional date check
+df2 <- data.frame(
+  signup_date = c(
+    "2023-01-15", "2023-02-20", "not a date",
+    "2023-03-10", "2023-04-01"
+  ),
+  stringsAsFactors = FALSE
+)
+report2 <- validate_df(df2, date_columns = c(signup_date = "\%Y-\%m-\%d"))
+report2
 
 }

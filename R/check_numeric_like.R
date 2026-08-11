@@ -8,7 +8,7 @@ check_column_type <- function(chr_vec) {
   propotion <- round(convertible_count / non_missing_count * 100, 2)
 
   if (propotion >= 80 & propotion < 100) {
-    non_convertible_index <- which(is.na(convert_to_num) & !na_index)
+    non_convertible_index <- which(!na_index & is.na(convert_to_num))
     return_val <- list(
       expected_type = "numeric",
       proportion_convertible = propotion,
@@ -51,10 +51,10 @@ check_column_type <- function(chr_vec) {
 #'   city = c("Thimphu", "Paro", "Punakha", "Wangdue", "Trongsa"),
 #'   stringsAsFactors = FALSE
 #' )
-#' check_types(df)
+#' check_numeric_like(df)
 #'
 #' @export
-check_types <- function(data) {
+check_numeric_like <- function(data) {
   if (!is.data.frame(data)) {
     stop("`data` must be a data frame.", call. = FALSE)
   }
