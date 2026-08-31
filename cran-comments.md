@@ -8,4 +8,4 @@
 
 * local macOS install, R 4.x, devtools::check() — 0 errors, 0 warnings, 0 notes
 * win-builder (R-devel) — 0 errors, 0 warnings, 1 note (expected "New submission" note)
-* R-hub: linux, macos, macos-arm64, windows, ubuntu-release — all completed successfully.
+* R-hub v2 (GitHub Actions): linux, macos, macos-arm64, windows, ubuntu-release — all checks completed successfully
