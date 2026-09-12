@@ -1,0 +1,9 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  validateR: validateR.html
+last_built: 2026-09-12T04:07Z
+urls:
+  reference: https://ugyennorbu.github.io/validateR/reference
+  article: https://ugyennorbu.github.io/validateR/articles
