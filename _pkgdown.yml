@@ -1,0 +1,22 @@
+url: https://ugyennorbu.github.io/validateR/
+template:
+  bootstrap: 5
+reference:
+- title: Main entry point
+  desc: Run all checks at once and get a structured report.
+  contents: validate_df
+- title: Individual checks
+  desc: Run a single check on its own.
+  contents:
+  - check_missing
+  - check_outliers
+  - check_duplicates
+  - check_numeric_like
+  - check_date_like
+- title: The validation_report object
+  desc: Constructor and display methods for the report object.
+  contents:
+  - new_validation_report
+  - print.validation_report
+  - plot.validation_report
+
